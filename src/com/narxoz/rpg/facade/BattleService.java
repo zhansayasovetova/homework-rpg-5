@@ -15,21 +15,74 @@ public class BattleService {
     }
 
     public AdventureResult battle(HeroProfile hero, BossEnemy boss, AttackAction action) {
-        // TODO: Implement the battle flow.
-        // Questions to answer:
-        // - Who attacks first?
-        // - How many rounds are allowed?
-        // - How is damage resolved?
-        // - How will randomness affect the result, if at all?
         AdventureResult result = new AdventureResult();
-        result.setWinner("TODO");
-        result.setRounds(0);
-        result.setReward("TODO");
-        result.addLine("TODO: implement battle logic");
 
-        // Keep the field in use so students can decide whether to rely on it.
-        if (random.nextInt(1) == 0) {
-            // TODO: Replace placeholder branch with real deterministic or random logic.
+        if (hero == null || boss == null || action == null) {
+            result.setWinner("Invalid");
+            result.setRounds(0);
+            result.setReward("No reward");
+            result.addLine("Battle failed: invalid inputs.");
+            return result;
+        }
+
+        if (!hero.isAlive()) {
+            result.setWinner(boss.getName());
+            result.setRounds(0);
+            result.setReward("No reward");
+            result.addLine("Battle cannot start: hero is already defeated.");
+            return result;
+        }
+
+        if (!boss.isAlive()) {
+            result.setWinner(hero.getName());
+            result.setRounds(0);
+            result.setReward("No reward");
+            result.addLine("Battle cannot start: boss is already defeated.");
+            return result;
+        }
+
+        int rounds = 0;
+        int maxRounds = 20;
+
+        result.addLine("Battle started: " + hero.getName() + " vs " + boss.getName());
+        result.addLine("Hero attack: " + action.getActionName());
+        result.addLine("Effects: " + action.getEffectSummary());
+
+        while (hero.isAlive() && boss.isAlive() && rounds < maxRounds) {
+            rounds++;
+            result.addLine("---- Round " + rounds + " ----");
+
+            int heroDamage = action.getDamage();
+            boss.takeDamage(heroDamage);
+            result.addLine(hero.getName() + " deals " + heroDamage + " damage to " + boss.getName()
+                    + ". Boss HP: " + boss.getHealth());
+
+            if (!boss.isAlive()) {
+                break;
+            }
+
+            int bossDamage = boss.getAttackPower();
+            hero.takeDamage(bossDamage);
+            result.addLine(boss.getName() + " deals " + bossDamage + " damage to " + hero.getName()
+                    + ". Hero HP: " + hero.getHealth());
+
+            if (random.nextInt(1) == 0) {
+                // placeholder branch to keep random in use
+            }
+        }
+
+        result.setRounds(rounds);
+        result.setReward("No reward yet");
+
+        if (hero.isAlive() && !boss.isAlive()) {
+            result.setWinner(hero.getName());
+            result.addLine("Winner: " + hero.getName());
+        } else if (boss.isAlive() && !hero.isAlive()) {
+            result.setWinner(boss.getName());
+            result.addLine("Winner: " + boss.getName());
+        } else {
+            result.setWinner("Draw");
+            result.addLine("Result: Draw");
         }
 
         return result;
